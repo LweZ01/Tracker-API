@@ -1,80 +1,69 @@
-expense-tracker-api/
-├── src/
-│ ├── config/
-│ │ ├── database.js # conexión a Supabase/Postgres
-│ │ └── env.js # carga y valida variables de entorno
-│ │
-│ ├── modules/
-│ │ ├── auth/
-│ │ │ ├── auth.routes.js
-│ │ │ ├── auth.controller.js
-│ │ │ ├── auth.service.js
-│ │ │ └── auth.validation.js
-│ │ │
-│ │ ├── users/
-│ │ │ ├── users.repository.js
-│ │ │ └── users.model.js # si usas un query builder/ORM
-│ │ │
-│ │ └── expenses/
-│ │ ├── expenses.routes.js
-│ │ ├── expenses.controller.js
-│ │ ├── expenses.service.js
-│ │ ├── expenses.repository.js
-│ │ └── expenses.validation.js
-│ │
-│ ├── middlewares/
-│ │ ├── auth.middleware.js # verifica JWT
-│ │ ├── error.middleware.js # manejo centralizado de errores
-│ │ └── validate.middleware.js # ejecuta validaciones
-│ │
-│ ├── utils/
-│ │ ├── jwt.util.js
-│ │ ├── password.util.js # bcrypt hash/compare
-│ │ ├── ApiError.js # clase de error custom
-│ │ └── dateFilters.util.js # lógica de week/month/3months/custom
-│ │
-│ ├── app.js # configuración de Express (middlewares globales, rutas)
-│ └── server.js # arranque del servidor (listen)
-│
-├── .env
-├── .env.example
-├── package.json
-└── README.md
+## To-Do general — Expense Tracker API
 
-To-Do general — Expense Tracker API
 ✅ Completado
-Diseño de base de datos
-Esquema completo: users, categories, expenses en 3FN
-Constraints (FK, UNIQUE, CHECK), índices compuestos (user_id + expense_date)
-Decisión: sin RLS (autorización a nivel de aplicación)
-SQL corrido en Supabase — funcionando
-Estructura de carpetas (MVC + capas) creada
-Servidor mínimo (app.js + server.js) — levantado y probado con /health
-Config y conexión a DB
-env.js — validación de variables requeridas, fail-fast uniforme con process.exit(1)
-database.js — pool de pg, decisión de exponer solo query (sin pool como default export, ya que no hay necesidad de transacciones con el esquema actual)
+
+## Base de datos
+
+## Esquema completo (users, categories, expenses) en 3FN, con constraints, índices compuestos, sin RLS
+
+## SQL corrido en Supabase — funcionando
+
+## Infraestructura base
+
+## Estructura de carpetas (MVC + capas) creada
+
+## app.js + server.js — servidor funcionando, script dev con node --watch
+
+## env.js — validación de variables, fail-fast uniforme
+
+## database.js — pool de pg, expone solo query
+
+## Módulo de Auth — 100% completo y probado
+
+## UserRepository (createUser, findUserByEmail, findUserById)
+
+## PasswordHasher (hash/compare con bcrypt)
+
+## TokenService (jsonwebtoken — access 15m, refresh 7d)
+
+## ApiError (clase base de errores operacionales)
+
+## AuthService (signup, login — con protección anti-enumeración)
+
+## AuthController + auth.routes.js
+
+## auth.validation.js (zod) + validate.middleware.js
+
+## error.middleware.js (formato de error unificado en toda la API)
+
+## auth.middleware.js (protección JWT de rutas, usa ApiError)
+
+## container.js (composition root) — incluye authMiddleware listo para usar
+
+## Probado end-to-end: signup, email duplicado, validación, login exitoso, credenciales inválidas — todo funcionando
 
 🔲 Pendiente
-Auth
-users.repository.js (siguiente paso)
-jwt.util.js — generación/verificación de JWT propio
-password.util.js — hash/compare con bcrypt
-auth.service.js — lógica de signup/login
-auth.validation.js — validar email, password
-auth.controller.js + auth.routes.js — POST /auth/signup, POST /auth/login
-auth.middleware.js — verificar JWT en rutas protegidas
-Expenses CRUD
-expenses.repository.js, expenses.service.js, expenses.validation.js
-expenses.controller.js + expenses.routes.js:
+
+## Módulo de Expenses
+
+expenses.repository.js (clase, mismo patrón que UserRepository)
+CRUD: create, findById, findByUserId (con filtros de fecha), update, delete
+Scoped siempre a user_id del JWT — nunca confiar en id del body/params
+expenses.validation.js (zod: amount > 0, categoría válida, fechas, etc.)
+expenses.service.js
+Lógica de filtros: past week / past month / last 3 months / custom range
+Verificar que el expense pertenece al usuario antes de update/delete
+expenses.controller.js
 POST /expenses
-GET /expenses (con filtros: week/month/3months/custom)
+GET /expenses (con query params de filtro)
 PUT /expenses/:id
 DELETE /expenses/:id
-dateFilters.util.js — lógica de los filtros de fecha
-Manejo de errores centralizado
-ApiError.js + error.middleware.js
-Buenas prácticas API
+expenses.routes.js — todas las rutas protegidas con authMiddleware
+dateFilters.util.js — lógica reusable para calcular rangos de fecha (week/month/3months)
+Actualizar container.js con las nuevas dependencias de expenses
+Montar /expenses en app.js
+
+Buenas prácticas finales
+
 Paginación en GET /expenses
-Formato de respuesta consistente
-Rate limiting (opcional)
-Testing manual de todos los endpoints (Postman/Thunder Client)
+Testing manual completo de expenses (CRUD + cada filtro)
