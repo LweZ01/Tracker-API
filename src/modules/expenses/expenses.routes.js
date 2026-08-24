@@ -5,6 +5,7 @@ import {
   createExpenseSchema,
   updateExpenseSchema,
   expenseFilterSchema,
+  expenseIdParamSchema,
 } from "./expenses.validation.js";
 
 const router = Router();
@@ -27,12 +28,16 @@ router.get(
 router.put(
   "/:id",
   authMiddleware,
+  validate(expenseIdParamSchema, "params"),
   validate(updateExpenseSchema),
   (req, res, next) => expenseController.updateExpense(req, res, next),
 );
 
-router.delete("/:id", authMiddleware, (req, res, next) =>
-  expenseController.deleteExpense(req, res, next),
+router.delete(
+  "/:id",
+  authMiddleware,
+  validate(expenseIdParamSchema, "params"),
+  (req, res, next) => expenseController.deleteExpense(req, res, next),
 );
 
 export default router;

@@ -10,7 +10,7 @@ class TokenService {
 
   generateAccessToken(payload) {
     const minimalPayload = {
-      id: payload.id,
+      userId: payload.userId,
       ...(payload.email && { email: payload.email }),
     };
 
@@ -21,7 +21,7 @@ class TokenService {
 
   generateRefreshToken(payload) {
     const minimalPayload = {
-      id: payload.id,
+      userId: payload.userId,
     };
 
     return jwt.sign(minimalPayload, this.jwtRefreshSecret, {

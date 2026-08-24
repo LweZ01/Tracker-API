@@ -29,13 +29,30 @@ class ExpenseService {
     }
   }
 
-  async listExpenses(userId, { filter, startDate, endDate }) {
+  async listExpenses(userId, { filter, startDate, endDate, page, limit }) {
     const dateRange = this.getDateRangeForFilter(filter, {
       startDate,
       endDate,
     });
 
-    return await this.expenseRepository.findExpensesByUserId(userId, dateRange);
+    const [expenses, total] = await Promise.all([
+      this.expenseRepository.findExpensesByUserId(userId, {
+        ...dateRange,
+        page,
+        limit,
+      }),
+      this.expenseRepository.countExpensesByUserId(userId, dateRange),
+    ]);
+
+    return {
+      data: expenses,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async updateExpense(userId, expenseId, updates) {

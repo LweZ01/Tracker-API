@@ -5,7 +5,7 @@ class ExpenseController {
 
   async createExpense(req, res, next) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.userId;
       const { categoryId, amount, description, expenseDate } = req.body;
 
       const expense = await this.expenseService.createExpense({
@@ -24,16 +24,18 @@ class ExpenseController {
 
   async listExpenses(req, res, next) {
     try {
-      const userId = req.user.id;
-      const { filter, startDate, endDate } = req.query;
+      const userId = req.user.userId;
+      const { filter, startDate, endDate, page, limit } = req.validatedQuery;
 
-      const expenses = await this.expenseService.listExpenses(userId, {
+      const result = await this.expenseService.listExpenses(userId, {
         filter,
         startDate,
         endDate,
+        page,
+        limit,
       });
 
-      res.status(200).json({ expenses });
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }
@@ -41,8 +43,8 @@ class ExpenseController {
 
   async updateExpense(req, res, next) {
     try {
-      const userId = req.user.id;
-      const expenseId = req.params.id;
+      const userId = req.user.userId;
+      const expenseId = req.validatedParams.id;
       const updates = req.body;
 
       const expense = await this.expenseService.updateExpense(
@@ -59,8 +61,8 @@ class ExpenseController {
 
   async deleteExpense(req, res, next) {
     try {
-      const userId = req.user.id;
-      const expenseId = req.params.id;
+      const userId = req.user.userId;
+      const expenseId = req.validatedParams.id;
 
       await this.expenseService.deleteExpense(userId, expenseId);
 

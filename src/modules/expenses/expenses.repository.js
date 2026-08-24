@@ -38,7 +38,9 @@ class ExpenseRepository {
     return result.rows[0] || null;
   }
 
-  async findExpensesByUserId(userId, { startDate, endDate }) {
+  async findExpensesByUserId(userId, { startDate, endDate, page, limit }) {
+    const offset = (page - 1) * limit;
+
     const result = await this.query(
       `
         SELECT * FROM expenses 
@@ -46,10 +48,25 @@ class ExpenseRepository {
         AND expense_date 
         BETWEEN $2 AND $3 
         ORDER BY expense_date DESC
+        LIMIT $4 OFFSET $5
+        `,
+      [userId, startDate, endDate, limit, offset],
+    );
+    return result.rows || [];
+  }
+
+  async countExpensesByUserId(userId, { startDate, endDate }) {
+    const result = await this.query(
+      `
+        SELECT COUNT(*) FROM expenses
+        WHERE user_id = $1
+        AND expense_date
+        BETWEEN $2 AND $3
         `,
       [userId, startDate, endDate],
     );
-    return result.rows || [];
+    // COUNT(*) en Postgres vuelve como string, no number, hay que convertirlo
+    return parseInt(result.rows[0].count, 10);
   }
 
   async updateExpense(id, userId, updates) {

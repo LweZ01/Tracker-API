@@ -66,6 +66,30 @@ class AuthService {
       },
     };
   }
+
+  async refreshAccessToken(refreshToken) {
+    const { valid, payload, error } =
+      this.tokenService.verifyRefreshToken(refreshToken);
+
+    if (!valid) {
+      if (error === "expired") {
+        throw new ApiError(
+          "Refresh token has expired. Please login again.",
+          401,
+        );
+      }
+      throw new ApiError("Invalid refresh token. Please login again.", 401);
+    }
+
+    const accessToken = this.tokenService.generateAccessToken({
+      userId: payload.userId,
+    });
+
+    return {
+      accessToken,
+      expiresIn: this.tokenService.accessTokenTTL,
+    };
+  }
 }
 
 export default AuthService;

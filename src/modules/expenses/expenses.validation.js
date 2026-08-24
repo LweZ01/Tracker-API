@@ -25,6 +25,11 @@ export const expenseFilterSchema = z
     filter: z.enum(["week", "month", "3months", "custom"]),
     startDate: z.string().date().optional(),
     endDate: z.string().date().optional(),
+    // req.query siempre entrega strings, así que z.coerce.number()
+    // primero convierte "2" -> 2 antes de aplicar las validaciones.
+    // z.number() solo, sin coerce, rechazaría el string directamente.
+    page: z.coerce.number().int().positive().optional().default(1),
+    limit: z.coerce.number().int().positive().max(100).optional().default(20),
   })
   .refine(
     (data) => {
@@ -38,3 +43,7 @@ export const expenseFilterSchema = z
       path: ["startDate"],
     },
   );
+
+export const expenseIdParamSchema = z.object({
+  id: z.string().uuid(),
+});
