@@ -20,7 +20,16 @@ const authService = new AuthService(
   passwordHasher,
   tokenService,
 );
-const authController = new AuthController(authService);
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: config.NODE_ENV === "production",
+  sameSite: "strict",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
+const authController = new AuthController(authService, cookieOptions);
+
 const authMiddleware = authenticate(tokenService);
 
 // Expenses

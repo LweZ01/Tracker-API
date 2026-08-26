@@ -90,6 +90,16 @@ class AuthService {
       expiresIn: this.tokenService.accessTokenTTL,
     };
   }
+
+  async getCurrentUser(userId) {
+    const user = await this.userRepository.findUserById(userId);
+
+    if (!user) {
+      throw new ApiError("User not found", 404);
+    }
+
+    return user;
+  }
 }
 
 export default AuthService;
